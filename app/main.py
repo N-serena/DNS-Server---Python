@@ -2,7 +2,7 @@ import socket
 import struct
 
 class DNSHeader:
-        def __init__(self, ID, flag, QDCOUNT=1, ANCOUNT=0, NSCOUNT=0, ARCOUNT=0):
+        def __init__(self, ID, flag=0, QDCOUNT=1, ANCOUNT=0, NSCOUNT=0, ARCOUNT=0):
             self.ID = ID
             self.flag = flag
             self.QDCOUNT = QDCOUNT
