@@ -2,8 +2,9 @@ import socket
 import struct
 
 class DNSHeader:
-        def __init__(self, QDCOUNT, ID=1234, qr=1, ANCOUNT=0, NSCOUNT=0, ARCOUNT=0):
+        def __init__(self, QDCOUNT, ID=1234, flags=0x8000 qr=1, ANCOUNT=0, NSCOUNT=0, ARCOUNT=0):
             self.ID = ID
+            self.flags = flags
             self.qr = qr
             self.QDCOUNT = QDCOUNT
             self.ANCOUNT = ANCOUNT
@@ -13,6 +14,7 @@ class DNSHeader:
         def pack(self):
             return struct.pack("!HHHHHH",
             self.ID,
+            self.flags,
             self.qr,
             self.QDCOUNT,
             self.ANCOUNT,
@@ -51,16 +53,18 @@ def main():
         try:
             # Receive a DNS query
             buf, source = udp_socket.recvfrom(512)
+
+            query_id = struct.unpack('!H', buf[:2])[0]
+            question = DNSQuestion(qname="codecrafters.io")
+            question = question.pack()
+            print(f"Receiving question from {question}")
+
             header = DNSHeader(QDCOUNT=1)
             header = header.pack()
             print(f"Received request from {source}")
 
-            question = DNSQuestion(qname="\x0ccodecrafters\x02io", qtype=1, qclass=1)
-            question = question.pack()
-            print(f"Receiving question from {question}")
-
             response = header + question
-            response = b"\x04\xd2\x80" + (b"\x00" * 9)
+            #response = b"\x04\xd2\x80" + (b"\x00" * 9)
     
             udp_socket.sendto(response, source)
         except Exception as e:
