@@ -2,7 +2,7 @@ import socket
 import struct
 
 class DNSHeader:
-        def __init__(self, ID, flag=0x0100, QDCOUNT=1, ANCOUNT=0, NSCOUNT=0, ARCOUNT=0):
+        def __init__(self, QDCOUNT, ID=1234, flag=0x0100, ANCOUNT=0, NSCOUNT=0, ARCOUNT=0):
             self.ID = ID
             self.flag = flag
             self.QDCOUNT = QDCOUNT
@@ -26,7 +26,7 @@ class DNSQuestion:
     :param qtype: The type of query (e.g., 1 for A record).
     :param qclass: The class of query (e.g., 1 for IN - Internet).
     """
-    def __init__(self, qname="", qtype=1, qclass=1):
+    def __init__(self, qname, qtype=1, qclass=1):
         self.qname = qname
         self.qtype = qtype
         self.qclass= qclass
@@ -51,11 +51,11 @@ def main():
         try:
             # Receive a DNS query
             buf, source = udp_socket.recvfrom(512)
-            header = DNSHeader(ID=1234, QDCOUNT=1)
+            header = DNSHeader(QDCOUNT=1)
             header = header.pack()
             print(f"Received request from {source}")
 
-            question = DNSQuestion(qname="codecrafter.io")
+            question = DNSQuestion(qname="codecrafter.io", qtype=1, qclass=1)
             question = question.pack()
             print(f"Receiving question from {question}")
 
