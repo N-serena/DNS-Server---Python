@@ -1,19 +1,8 @@
 import socket
 import struct
 
-
-def main():
-    print("DNS Server is running on 127.0.0.1:2053...")
-    
-    # You can use print statements as follows for debugging, they'll be visible when running tests.
-    print("Logs from your program will appear here!")
-
-    # UDP socket is created and bound to the local address 127.0.0.1 on port 2053
-    udp_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    udp_socket.bind(("127.0.0.1", 2053))
-    
-    class DNSHeader:
-        def __init__(self, ID=0, flag=0, QDCOUNT=1, ANCOUNT=0, NSCOUNT=0, ARCOUNT=0):
+class DNSHeader:
+        def __init__(self, ID, flag, QDCOUNT=1, ANCOUNT=0, NSCOUNT=0, ARCOUNT=0):
             self.ID = ID
             self.flag = flag
             self.QDCOUNT = QDCOUNT
@@ -30,29 +19,39 @@ def main():
             self.NSCOUNT,
             self.ARCOUNT)    
  
-    class DNSQuestion:
-        """
-        Initialize a DNS question.
-        :param qname: The domain name being queried (e.g., "example.com").
-        :param qtype: The type of query (e.g., 1 for A record).
-        :param qclass: The class of query (e.g., 1 for IN - Internet).
-        """
-        def __init__(self, qname="", qtype=1, qclass=1):
-            self.qname = qname
-            self.qtype = qtype
-            self.qclass= qclass
+class DNSQuestion:
+    """
+    Initialize a DNS question.
+    :param qname: The domain name being queried (e.g., "example.com").
+    :param qtype: The type of query (e.g., 1 for A record).
+    :param qclass: The class of query (e.g., 1 for IN - Internet).
+    """
+    def __init__(self, qname="", qtype=1, qclass=1):
+        self.qname = qname
+        self.qtype = qtype
+        self.qclass= qclass
 
-        def pack(self):
-            labels = self.qname.split(".")
-            packed_name = b''.join([bytes([len(label)]) + label.encode('utf-8') for label in labels]) + b'\x00'
-            return packed_name + struct.pack('!HH', self.qtype, self.qclass)
-            
+    def pack(self):
+        labels = self.qname.split(".")
+        packed_name = b''.join([bytes([len(label)]) + label.encode('utf-8') for label in labels]) + b'\x00'
+        return packed_name + struct.pack('!HH', self.qtype, self.qclass)
+        
+
+def main():
+    print("DNS Server is running on 127.0.0.1:2053...")
+    
+    # You can use print statements as follows for debugging, they'll be visible when running tests.
+    print("Logs from your program will appear here!")
+
+    # UDP socket is created and bound to the local address 127.0.0.1 on port 2053
+    udp_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    udp_socket.bind(("127.0.0.1", 2053))
     
     while True:
         try:
             # Receive a DNS query
             buf, source = udp_socket.recvfrom(512)
-            header = DNSHeader(ID=1234, QDCOUNT=1)
+            header = DNSHeader(ID=1234)
             header = header.pack()
             print(f"Received request from {source}")
 
