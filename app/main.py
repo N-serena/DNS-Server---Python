@@ -13,7 +13,7 @@ def main():
     udp_socket.bind(("127.0.0.1", 2053))
     
     class DNSHeader:
-        def __init__(self, ID=0, flag=0, QDCOUNT=0, ANCOUNT=0, NSCOUNT=0, ARCOUNT=0):
+        def __init__(self, ID=0, flag=0, QDCOUNT=1, ANCOUNT=0, NSCOUNT=0, ARCOUNT=0):
             self.ID = ID
             self.flag = flag
             self.QDCOUNT = QDCOUNT
