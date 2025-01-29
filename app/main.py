@@ -2,7 +2,7 @@ import socket
 import struct
 
 class DNSHeader:
-        def __init__(self, ID, flag=0, QDCOUNT=1, ANCOUNT=0, NSCOUNT=0, ARCOUNT=0):
+        def __init__(self, ID, flag=1, QDCOUNT=1, ANCOUNT=0, NSCOUNT=0, ARCOUNT=0):
             self.ID = ID
             self.flag = flag
             self.QDCOUNT = QDCOUNT
@@ -51,7 +51,7 @@ def main():
         try:
             # Receive a DNS query
             buf, source = udp_socket.recvfrom(512)
-            header = DNSHeader(ID=1234)
+            header = DNSHeader(ID=1234, QDCOUNT=1)
             header = header.pack()
             print(f"Received request from {source}")
 
