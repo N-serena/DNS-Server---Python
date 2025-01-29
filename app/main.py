@@ -2,7 +2,7 @@ import socket
 import struct
 
 class DNSHeader:
-        def __init__(self, QDCOUNT, ID=1234, flag=0x0100, ANCOUNT=0, NSCOUNT=0, ARCOUNT=0):
+        def __init__(self, QDCOUNT, ID=1234, flag=0, ANCOUNT=0, NSCOUNT=0, ARCOUNT=0):
             self.ID = ID
             self.flag = flag
             self.QDCOUNT = QDCOUNT
@@ -59,7 +59,7 @@ def main():
             question = question.pack()
             print(f"Receiving question from {question}")
 
-            response = b""
+            response = header + question
             response = b"\x04\xd2\x80" + (b"\x00" * 9)
     
             udp_socket.sendto(response, source)
