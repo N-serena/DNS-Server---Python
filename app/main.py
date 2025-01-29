@@ -30,6 +30,24 @@ def main():
             self.NSCOUNT,
             self.ARCOUNT)    
  
+    class DNSQuestion:
+        """
+        Initialize a DNS question.
+        :param qname: The domain name being queried (e.g., "example.com").
+        :param qtype: The type of query (e.g., 1 for A record).
+        :param qclass: The class of query (e.g., 1 for IN - Internet).
+        """
+        def __init__(self, qname="", qtype=1, qclass=1):
+            self.qname = qname
+            self.qtype = qtype
+            self.qclass= qclass
+
+        def pack(self):
+            labels = self.qname.split(".")
+            packed_name = b''.join([bytes([len(label)]) + label.encode('utf-8') for label in labels]) + b'\x00'
+            return packed_name + struct.pack('!HH', self.qtype, self.qclass)
+            
+    
     while True:
         try:
             # Receive a DNS query
@@ -37,6 +55,10 @@ def main():
             header = DNSHeader(ID=1234, QDCOUNT=1)
             header = header.pack()
             print(f"Received request from {source}")
+
+            question = DNSQuestion("codecrafter.io")
+            question = question.pack()
+            print(f"Receiving question from {question}")
 
             response = b""
             response = b"\x04\xd2\x80" + (b"\x00" * 9)
