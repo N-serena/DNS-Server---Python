@@ -2,9 +2,8 @@ import socket
 import struct
 
 class DNSHeader:
-        def __init__(self, QDCOUNT, ID=1234, flags=0x8000, qr=1, ANCOUNT=0, NSCOUNT=0, ARCOUNT=0):
+        def __init__(self, QDCOUNT, ID=1234, qr=1, ANCOUNT=0, NSCOUNT=0, ARCOUNT=0):
             self.ID = ID
-            self.flags = flags
             self.qr = qr
             self.QDCOUNT = QDCOUNT
             self.ANCOUNT = ANCOUNT
@@ -14,7 +13,6 @@ class DNSHeader:
         def pack(self):
             return struct.pack("!HHHHHH",
             self.ID,
-            self.flags,
             self.qr,
             self.QDCOUNT,
             self.ANCOUNT,
@@ -54,7 +52,8 @@ def main():
             # Receive a DNS query
             buf, source = udp_socket.recvfrom(512)
 
-            query_id = struct.unpack('!H', buf[:2])[0]
+            #query_id = struct.unpack('!H', buf[:2])[0]
+
             question = DNSQuestion(qname="codecrafters.io")
             question = question.pack()
             print(f"Receiving question from {question}")
