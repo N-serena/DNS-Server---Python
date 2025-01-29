@@ -13,7 +13,7 @@ class DNSHeader:
         def pack(self):
             return struct.pack("!HHHHHH",
             self.ID,
-            self.flag,
+            self.qr,
             self.QDCOUNT,
             self.ANCOUNT,
             self.NSCOUNT,
