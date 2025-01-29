@@ -2,9 +2,9 @@ import socket
 import struct
 
 class DNSHeader:
-        def __init__(self, QDCOUNT, ID=1234, qr=1, ANCOUNT=0, NSCOUNT=0, ARCOUNT=0):
+        def __init__(self, QDCOUNT, ID=1234, QR=1, ANCOUNT=0, NSCOUNT=0, ARCOUNT=0):
             self.ID = ID
-            self.qr = qr
+            self.QR = QR
             self.QDCOUNT = QDCOUNT
             self.ANCOUNT = ANCOUNT
             self.NSCOUNT = NSCOUNT
@@ -13,7 +13,7 @@ class DNSHeader:
         def pack(self):
             return struct.pack("!HHHHHH",
             self.ID,
-            self.qr,
+            self.QR,
             self.QDCOUNT,
             self.ANCOUNT,
             self.NSCOUNT,
