@@ -44,7 +44,7 @@ class DNSAnswer:
         self.rclass = rclass
         self.ttl = ttl #time-to-live
         self.rdlength = rdlength
-        self.rdata = rdata
+        self.rdata = rdata #The function socket.inet_aton("8.8.8.8") converts the IPv4 address "8.8.8.8" from its dotted-quad string format to a 32-bit packed binary format
 
     def pack(self):
         labels = self.rname.split(".")
@@ -71,7 +71,7 @@ def main():
             print(f"Receiving question from {question}")
 
             # Create an answer (example: responding with an A record)
-            answer = DNSAnswer(rname="codecrafter.io").pack()
+            answer = DNSAnswer(rname="codecrafters.io").pack()
 
             header = DNSHeader(QDCOUNT=1).pack()
             print(f"Received request from {source}")
