@@ -2,9 +2,9 @@ import socket
 import struct
 
 class DNSHeader:
-        def __init__(self, QDCOUNT, ID=1234, flags=0x8000, ANCOUNT=0, NSCOUNT=0, ARCOUNT=0):
+        def __init__(self, QDCOUNT, ID=1234, flags=0x8000, ANCOUNT=1, NSCOUNT=0, ARCOUNT=0):
             self.ID = ID
-            self.flags = flags
+            self.flags = flags # 0x8000 sets QR bit to 1 (response)
             self.QDCOUNT = QDCOUNT
             self.ANCOUNT = ANCOUNT
             self.NSCOUNT = NSCOUNT
@@ -35,7 +35,22 @@ class DNSQuestion:
         labels = self.qname.split(".")
         packed_name = b''.join([bytes([len(label)]) + label.encode('utf-8') for label in labels]) + b'\x00'
         return packed_name + struct.pack('!HH', self.qtype, self.qclass)
-        
+
+#ResourceRecord        
+class DNSAnswer:
+    def __init__(self, rname, rtype=1, rclass=1, ttl=60, rdlength=4, rdata="8.8.8.8"):
+        self.rname = rname
+        self.rtype = rtype
+        self.rclass = rclass
+        self.ttl = ttl #time-to-live
+        self.rdlength = rdlength
+        self.rdata = rdata
+
+    def pack(self):
+        labels = self.rname.split(".")
+        packed_name = b''.join([bytes([len(label)]) + label.encode('utf-8') for label in labels]) + b'\x00'
+        packed_fixed = struct.pack('!HHIH', self.rtype, self.rclass, self.ttl, len(self.rdata))
+        return packed_name + packed_fixed + self.rdata
 
 def main():
     print("DNS Server is running on 127.0.0.1:2053...")
@@ -52,17 +67,16 @@ def main():
             # Receive a DNS query
             buf, source = udp_socket.recvfrom(512)
 
-            #query_id = struct.unpack('!H', buf[:2])[0]
-
-            question = DNSQuestion(qname="codecrafters.io")
-            question = question.pack()
+            question = DNSQuestion(qname="codecrafters.io").pack()
             print(f"Receiving question from {question}")
 
-            header = DNSHeader(QDCOUNT=1)
-            header = header.pack()
+            # Create an answer (example: responding with an A record)
+            answer = DNSAnswer(rname="codecrafter.io").pack()
+
+            header = DNSHeader(QDCOUNT=1).pack()
             print(f"Received request from {source}")
 
-            response = header + question
+            response = header + question + answer
             #response = b"\x04\xd2\x80" + (b"\x00" * 9)
     
             udp_socket.sendto(response, source)
