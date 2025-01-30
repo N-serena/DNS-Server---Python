@@ -38,7 +38,7 @@ class DNSQuestion:
 
 #ResourceRecord        
 class DNSAnswer:
-    def __init__(self, rname, rtype=1, rclass=1, ttl=60, rdlength=4, rdata="8.8.8.8"):
+    def __init__(self, rname, rtype=1, rclass=1, ttl=60, rdlength=4, rdata=socket.inet_aton("8.8.8.8")):
         self.rname = rname
         self.rtype = rtype
         self.rclass = rclass
