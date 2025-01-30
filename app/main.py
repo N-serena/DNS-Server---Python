@@ -49,7 +49,7 @@ class DNSAnswer:
     def pack(self):
         labels = self.rname.split(".")
         packed_name = b''.join([bytes([len(label)]) + label.encode('utf-8') for label in labels]) + b'\x00'
-        packed_fixed = struct.pack('!HHIH', self.rtype, self.rclass, self.ttl, len(self.rdata))
+        packed_fixed = struct.pack('!HHIHBBBB', self.rtype, self.rclass, self.ttl, len(self.rdata))
         return packed_name + packed_fixed + self.rdata
 
 def main():
