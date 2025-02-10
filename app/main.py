@@ -1,9 +1,18 @@
 import socket
 import struct
 
+#DNSHeader
 class DNSHeader:
-        def __init__(self, QDCOUNT, ID=1234, flags=0x8000, ANCOUNT=1, NSCOUNT=0, ARCOUNT=0):
+        def __init__(self, QDCOUNT, ID, OPCODE, RD, QR=1, AA=0, TC=0, RA=0, Z=0, RCODE=0, flags=0x8000, ANCOUNT=1, NSCOUNT=0, ARCOUNT=0):
             self.ID = ID
+            self.OPCODE = OPCODE
+            self.RD = RD
+            self.QR = QR # 0x8000 sets QR bit to 1 (response)
+            self.AA = AA
+            self.TC = TC
+            self.RA = RA
+            self.Z = Z
+            self.RCODE = RCODE
             self.flags = flags # 0x8000 sets QR bit to 1 (response)
             self.QDCOUNT = QDCOUNT
             self.ANCOUNT = ANCOUNT
@@ -18,7 +27,20 @@ class DNSHeader:
             self.ANCOUNT,
             self.NSCOUNT,
             self.ARCOUNT)    
- 
+        
+        def unpack(self, data):
+            self.ID, self.flags, self.QDCOUNT, self.ANCOUNT, self.NSCOUNT, self.ARCOUNT = struct.unpack("!HHHHHH", data)
+            self.QR = self.flags & 0x8000
+            self.AA = self.flags & 0x0400
+            self.TC = self.flags & 0x0200
+            self.RD = self.flags & 0x0100
+            self.RA = self.flags & 0x0080
+            self.Z = self.flags & 0x0070
+            self.OPCODE = self.flags & 0x000F
+            self.RCODE = self.flags & 0x000F
+            return self
+
+#DNSQuestion
 class DNSQuestion:
     """
     Initialize a DNS question.
@@ -31,6 +53,7 @@ class DNSQuestion:
         self.qtype = qtype
         self.qclass= qclass
 
+    # Pack the question into a byte string.
     def pack(self):
         labels = self.qname.split(".")
         packed_name = b''.join([bytes([len(label)]) + label.encode('utf-8') for label in labels]) + b'\x00'
@@ -45,7 +68,8 @@ class DNSAnswer:
         self.ttl = ttl #time-to-live
         self.rdlength = rdlength
         self.rdata = rdata #The function socket.inet_aton("8.8.8.8") converts the IPv4 address "8.8.8.8" from its dotted-quad string format to a 32-bit packed binary format
-
+    
+    # Pack the resource record into a byte string.
     def pack(self):
         labels = self.rname.split(".")
         packed_name = b''.join([bytes([len(label)]) + label.encode('utf-8') for label in labels]) + b'\x00'
@@ -67,11 +91,17 @@ def main():
             # Receive a DNS query
             buf, source = udp_socket.recvfrom(512)
 
+            # Unpack the header
+            header = DNSHeader().unpack(buf[:12])
+            
+            RCODE = 0 if header.OPCODE == 0 else 4
+
             question = DNSQuestion(qname="codecrafters.io").pack()
             print(f"Receiving question from {question}")
 
             # Create an answer (example: responding with an A record)
             answer = DNSAnswer(rname="codecrafters.io").pack()
+            print(f"Anwser: {answer}")
 
             header = DNSHeader(QDCOUNT=1).pack()
             print(f"Received request from {source}")
