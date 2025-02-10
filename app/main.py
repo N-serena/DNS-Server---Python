@@ -29,7 +29,7 @@ class DNSHeader:
             self.NSCOUNT,
             self.ARCOUNT)    
         
-        def unpack(self, data):
+        def unpack(self,cls, data):
             self.ID, self.flags, self.QDCOUNT, self.ANCOUNT, self.NSCOUNT, self.ARCOUNT = struct.unpack("!HHHHHH", data)
             self.QR = self.flags & 0x1
             self.AA = self.flags & 0x1
@@ -39,7 +39,7 @@ class DNSHeader:
             self.Z = self.flags & 0x7
             self.OPCODE = self.flags & 0xF
             self.RCODE = self.flags & 0xF
-            return self
+            return cls(self.ID, self.OPCODE, self.RD, self.QR, self.AA, self.TC, self.RA, self.Z, self.RCODE, self.QDCOUNT, self.ANCOUNT, self.NSCOUNT, self.ARCOUNT)
 
 #DNSQuestion
 class DNSQuestion:
