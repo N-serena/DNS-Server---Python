@@ -3,7 +3,7 @@ import struct
 
 #DNSHeader
 class DNSHeader:
-        def __init__(self, OPCODE, RD, ID=1234, QR=1, AA=0, TC=0, RA=0, Z=0, RCODE=0, QDCOUNT=1, ANCOUNT=1, NSCOUNT=0, ARCOUNT=0):
+        def __init__(self, OPCODE, RD, ID, QR=1, AA=0, TC=0, RA=0, Z=0, RCODE=0, QDCOUNT=1, ANCOUNT=1, NSCOUNT=0, ARCOUNT=0):
             self.ID = ID
             self.OPCODE = OPCODE
             self.RD = RD
@@ -23,7 +23,7 @@ class DNSHeader:
             flags = (self.QR << 15) | (self.OPCODE << 11) | (self.AA << 10) | (self.TC << 9) | (self.RD << 8) | (self.RA << 7) | (self.Z << 4) | self.RCODE
             return struct.pack("!HHHHHH",
             self.ID,
-            self.flags,
+            flags,
             self.QDCOUNT,
             self.ANCOUNT,
             self.NSCOUNT,
@@ -105,7 +105,7 @@ def main():
             
             RCODE = 0 if header.OPCODE == 0 else 4
 
-            header = DNSHeader(RCODE, RD=query_header.RD, OPCODE=query_header.OPCODE).pack()
+            header = DNSHeader(ID=query_header.ID, RD=query_header.RD, OPCODE=query_header.OPCODE, RCODE=RCODE).pack()
             print(f"Received request from {source}")
 
             response = header + question + answer
