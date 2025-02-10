@@ -3,7 +3,7 @@ import struct
 
 #DNSHeader
 class DNSHeader:
-        def __init__(self, QDCOUNT, OPCODE, RD, ID, QR=1, AA=0, TC=0, RA=0, Z=0, RCODE=0, flags=0x8000, ANCOUNT=1, NSCOUNT=0, ARCOUNT=0):
+        def __init__(self, QDCOUNT, OPCODE, RD, ID, QR=1, AA=0, TC=0, RA=0, Z=0, RCODE=0, ANCOUNT=1, NSCOUNT=0, ARCOUNT=0):
             self.ID = ID
             self.OPCODE = OPCODE
             self.RD = RD
@@ -13,13 +13,14 @@ class DNSHeader:
             self.RA = RA
             self.Z = Z
             self.RCODE = RCODE
-            self.flags = flags # 0x8000 sets QR bit to 1 (response)
+            #self.flags = flags # 0x8000 sets QR bit to 1 (response)
             self.QDCOUNT = QDCOUNT
             self.ANCOUNT = ANCOUNT
             self.NSCOUNT = NSCOUNT
             self.ARCOUNT = ARCOUNT
     
         def pack(self):
+            flags = (self.QR << 15) | (self.OPCODE << 11) | (self.AA << 10) | (self.TC << 9) | (self.RD << 8) | (self.RA << 7) | (self.Z << 4) | self.RCODE
             return struct.pack("!HHHHHH",
             self.ID,
             self.flags,
@@ -30,14 +31,14 @@ class DNSHeader:
         
         def unpack(self, data):
             self.ID, self.flags, self.QDCOUNT, self.ANCOUNT, self.NSCOUNT, self.ARCOUNT = struct.unpack("!HHHHHH", data)
-            self.QR = self.flags & 0x8000
-            self.AA = self.flags & 0x0400
-            self.TC = self.flags & 0x0200
-            self.RD = self.flags & 0x0100
-            self.RA = self.flags & 0x0080
-            self.Z = self.flags & 0x0070
-            self.OPCODE = self.flags & 0x000F
-            self.RCODE = self.flags & 0x000F
+            self.QR = self.flags & 0x1
+            self.AA = self.flags & 0x1
+            self.TC = self.flags & 0x1
+            self.RD = self.flags & 0x1
+            self.RA = self.flags & 0x1
+            self.Z = self.flags & 0x7
+            self.OPCODE = self.flags & 0xF
+            self.RCODE = self.flags & 0xF
             return self
 
 #DNSQuestion
