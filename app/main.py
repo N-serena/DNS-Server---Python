@@ -3,7 +3,7 @@ import struct
 
 #DNSHeader
 class DNSHeader:
-        def __init__(self, QDCOUNT, ID, OPCODE, RD, QR=1, AA=0, TC=0, RA=0, Z=0, RCODE=0, flags=0x8000, ANCOUNT=1, NSCOUNT=0, ARCOUNT=0):
+        def __init__(self, QDCOUNT, OPCODE, RD, ID, QR=1, AA=0, TC=0, RA=0, Z=0, RCODE=0, flags=0x8000, ANCOUNT=1, NSCOUNT=0, ARCOUNT=0):
             self.ID = ID
             self.OPCODE = OPCODE
             self.RD = RD
@@ -91,11 +91,6 @@ def main():
             # Receive a DNS query
             buf, source = udp_socket.recvfrom(512)
 
-            # Unpack the header
-            header = DNSHeader().unpack(buf[:12])
-            
-            RCODE = 0 if header.OPCODE == 0 else 4
-
             question = DNSQuestion(qname="codecrafters.io").pack()
             print(f"Receiving question from {question}")
 
@@ -103,7 +98,12 @@ def main():
             answer = DNSAnswer(rname="codecrafters.io").pack()
             print(f"Anwser: {answer}")
 
-            header = DNSHeader(QDCOUNT=1).pack()
+            # Unpack the header
+            query_header = DNSHeader().unpack(buf[:12])
+            
+            RCODE = 0 if header.OPCODE == 0 else 4
+
+            header = DNSHeader(RCODE, ID=query_header.ID, OPCODE=query_header.OPCODE, QDCOUNT=1).pack()
             print(f"Received request from {source}")
 
             response = header + question + answer
