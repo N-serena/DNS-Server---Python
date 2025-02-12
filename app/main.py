@@ -65,16 +65,27 @@ class DNSQuestion:
 
     # Unpack a question from a byte string.
     @classmethod
-    def unpack(cls, data):
+    def unpack(cls, data, offset):
         qname = []
         while True:
             length = data[0]
             if length == 0:
+                offset += 1
                 break
-            qname.append(data[1:1+length].decode('utf-8'))
-            data = data[1+length:]
-        qtype, qclass = struct.unpack('!HH', data[:4])
-        return cls(".".join(qname), qtype, qclass)
+            # Check if the length is a pointer
+            if length & 0xC0 == 0xC0:
+                pointer = struct.unpack('!H', data[offset:offset+2])[0] & 0x3FFF
+                qname.append(cls.unpack(data[pointer:])[0])
+                offset += 2
+                break
+            else:
+                offset += 1
+
+            qname.append(data[offset:offset+length].decode('utf-8'))
+            offset += length
+            
+        qtype, qclass = struct.unpack('!HH', data[offset:offset+4])
+        return cls(".".join(qname), qtype, qclass), offset + 4
 
 #ResourceRecord        
 class DNSAnswer:
@@ -107,6 +118,7 @@ def main():
         try:
             # Receive a DNS query
             buf, source = udp_socket.recvfrom(512)
+            print(f"Received {len(buf)} of {buf} bytes from {source}")
 
             # Unpack the header
             query_header = DNSHeader.unpack(buf[:12])
