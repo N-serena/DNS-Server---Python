@@ -19,6 +19,7 @@ class DNSHeader:
             self.NSCOUNT = NSCOUNT
             self.ARCOUNT = ARCOUNT
     
+        # Pack the header into a byte string.
         def pack(self):
             flags = (self.QR << 15) | (self.OPCODE << 11) | (self.AA << 10) | (self.TC << 9) | (self.RD << 8) | (self.RA << 7) | (self.Z << 4) | self.RCODE
             return struct.pack("!HHHHHH",
@@ -29,6 +30,7 @@ class DNSHeader:
             self.NSCOUNT,
             self.ARCOUNT)    
         
+        # Unpack a header from a byte string.
         @classmethod
         def unpack(cls, data):
             ID, flags, QDCOUNT, ANCOUNT, NSCOUNT, ARCOUNT = struct.unpack("!HHHHHH", data)
@@ -60,6 +62,19 @@ class DNSQuestion:
         labels = self.qname.split(".")
         packed_name = b''.join([bytes([len(label)]) + label.encode('utf-8') for label in labels]) + b'\x00'
         return packed_name + struct.pack('!HH', self.qtype, self.qclass)
+
+    # Unpack a question from a byte string.
+    @classmethod
+    def unpack(cls, data):
+        qname = []
+        while True:
+            length = data[0]
+            if length == 0:
+                break
+            qname.append(data[1:1+length].decode('utf-8'))
+            data = data[1+length:]
+        qtype, qclass = struct.unpack('!HH', data[:4])
+        return cls(".".join(qname), qtype, qclass)
 
 #ResourceRecord        
 class DNSAnswer:
@@ -101,12 +116,14 @@ def main():
             header = DNSHeader(ID=query_header.ID, RD=query_header.RD, OPCODE=query_header.OPCODE, RCODE=RCODE).pack()
             print(f"Received request from {source}")
 
+            # Unpack the question
+            query_question = DNSQuestion.unpack(buf[12:])
 
-            question = DNSQuestion(qname="codecrafters.io").pack()
+            question = DNSQuestion(qname=query_question.qname).pack()
             print(f"Receiving question from {question}")
 
             # Create an answer (example: responding with an A record)
-            answer = DNSAnswer(rname="codecrafters.io").pack()
+            answer = DNSAnswer(rname=query_question.qname).pack()
             print(f"Anwser: {answer}")
 
             response = header + question + answer
