@@ -80,10 +80,8 @@ class DNSQuestion:
                 break
             else:
                 offset += 1
-
-            qname.append(data[offset:offset+length].decode('utf-8'))
-            offset += length
-            
+                qname.append(data[offset:offset+length].decode('utf-8'))
+                offset += length   
         qtype, qclass = struct.unpack('!HH', data[offset:offset+4])
         return cls(".".join(qname), qtype, qclass), offset + 4
 
