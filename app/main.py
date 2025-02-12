@@ -65,7 +65,7 @@ class DNSQuestion:
 
     # Unpack a question from a byte string.
     @classmethod
-    def unpack(cls, data, offset=0):
+    def unpack(cls, data, offset):
         qname = []
         while True:
             length = data[0]
@@ -128,8 +128,9 @@ def main():
             header = DNSHeader(ID=query_header.ID, RD=query_header.RD, OPCODE=query_header.OPCODE, RCODE=RCODE).pack()
             print(f"Received request from {source}")
 
-            # Unpack the question
-            query_question = DNSQuestion.unpack(buf[12:])
+
+            # Unpack all question
+            query_question, _ = DNSQuestion.unpack(buf[12:], offset=0)
 
             question = DNSQuestion(qname=query_question.qname).pack()
             print(f"Receiving question from {question}")
