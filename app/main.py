@@ -65,7 +65,7 @@ class DNSQuestion:
 
     # Unpack a question from a byte string.
     @classmethod
-    def unpack(cls, data, offset):
+    def unpack(cls, data, offset=0):
         qname = []
         while True:
             length = data[0]
