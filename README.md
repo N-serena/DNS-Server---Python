@@ -1,5 +1,3 @@
-[![progress-banner](https://backend.codecrafters.io/progress/dns-server/e8d6f97e-af38-4566-97ab-bed330789cc2)](https://app.codecrafters.io/users/codecrafters-bot?r=2qF)
-
 This is a starting point for Python solutions to the
 ["Build Your Own DNS server" Challenge](https://app.codecrafters.io/courses/dns-server/overview).
 
